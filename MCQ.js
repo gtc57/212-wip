@@ -1,34 +1,63 @@
-// written by Guy Cordell
-
 // function to load the quizzes
-async function loadQuiz()
-{
-    // reaaches out to the json to get the quizzes and waits til its done
-    const response = await fetch("phase-1.json");
-
-    // turn that data into usable form and return
+async function loadQuiz(filename) {
+    // Reaches out to the specific json file selected
+    const response = await fetch(filename);
     const data = await response.json();
-    return data;
+    
+    // Your JSON files have the questions inside a "questions" array, so we return that
+    return data.questions; 
 }
 
 // Function to show a barebones topic selector
-async function topicSelector()
-{
-    // loads quiz data
-    const quizData = await loadQuiz();
+async function topicSelector() {
+    // Create the container for the selector
+    const selectorDiv = document.createElement('div');
+    selectorDiv.style.textAlign = 'center';
+    selectorDiv.style.margin = '20px';
 
-    // TODO : CREATE LOOP TO GO THROUGH JSON FOR ALL QUIZ TOPICS AND QUESTIONS
+    const select = document.createElement('select');
+
+    // Default placeholder
+    const defaultOption = document.createElement('option');
+    defaultOption.textContent = "-- Select a Quiz Topic --";
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    select.appendChild(defaultOption);
+
+    // Array of your JSON files
+    const topics = [
+        { name: "Math", file: "math.json" },
+        { name: "Science", file: "science.json" },
+        { name: "History", file: "history.json" }
+    ];
+
+    // Loop through topics and add them to the dropdown
+    topics.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t.file;
+        option.textContent = t.name;
+        select.appendChild(option);
+    });
+
+    selectorDiv.appendChild(select);
+
+    // Listen for when the user picks a topic
+    select.addEventListener('change', async (e) => {
+        const selectedFile = e.target.value;
+        
+        // Fetch the data and overwrite the global quizData variable
+        quizData = await loadQuiz(selectedFile);
+        
+        // Restart the quiz with the new data
+        initQuiz();
+    });
+
+    // Add selector to the top of the page
+    document.body.prepend(selectorDiv);
 }
 
-// adds selector to page
-document.body.prepend(selectorDiv);
-
-
-// run on start
+// Run on start
 topicSelector();
-
-// end
-
 
 
 // written by Johnathan
